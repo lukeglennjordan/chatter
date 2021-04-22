@@ -228,8 +228,8 @@
 			$('#new_discussion').slideUp();
 		});
 		$('#new_discussion_btn').click(function(){
-			@if(Auth::guest())
-				window.location.href = "{{ route('login') }}";
+			@if(Auth::guard('forum')->guest())
+				window.location.href = "{{ route('forums.auth.login') }}";
 			@else
 				$('#new_discussion').slideDown();
 				$('#title').focus();

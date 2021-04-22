@@ -86,7 +86,7 @@ class ChatterDiscussionController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $user_id = Auth::user()->id;
+        $user_id = Auth::guard('forum')->user()->id;
 
         if (config('chatter.security.limit_time_between_posts')) {
             if ($this->notEnoughTimeBetweenDiscussion()) {
@@ -172,7 +172,7 @@ class ChatterDiscussionController extends Controller
 
     private function notEnoughTimeBetweenDiscussion()
     {
-        $user = Auth::user();
+        $user = Auth::guard('forum')->user();
 
         $past = Carbon::now()->subMinutes(config('chatter.security.time_between_posts'));
 
@@ -292,7 +292,7 @@ class ChatterDiscussionController extends Controller
 
         $discussion = Models::discussion()->where('slug', '=', $slug)->first();
 
-        $user_id = Auth::user()->id;
+        $user_id = Auth::guard('forum')->user()->id;
 
         // if it already exists, remove it
         if ($discussion->users->contains($user_id)) {

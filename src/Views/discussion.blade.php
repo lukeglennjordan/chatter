@@ -84,7 +84,7 @@
 	                	@foreach($posts as $post)
 	                		<li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
 		                		<span class="chatter_posts">
-		                			@if(!Auth::guest() && (Auth::user()->id == $post->user->id))
+		                			@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user->id))
 		                				<div id="delete_warning_{{ $post->id }}" class="chatter_warning_delete">
 		                					<i class="chatter-warning"></i> @lang('chatter::messages.response.confirm')
 		                					<button class="btn btn-sm btn-danger pull-right delete_response">@lang('chatter::messages.response.yes_confirm')</button>
@@ -144,7 +144,7 @@
 
 	            <div id="pagination">{{ $posts->links() }}</div>
 
-	            @if(!Auth::guest())
+	            @if(!Auth::guard('forum')->guest())
 
 	            	<div id="new_response">
 
@@ -154,15 +154,15 @@
 		        				<?php $db_field = Config::get('chatter.user.avatar_image_database_field'); ?>
 
 		        				<!-- If the user db field contains http:// or https:// we don't need to use the relative path to the image assets -->
-		        				@if( (substr(Auth::user()->{$db_field}, 0, 7) == 'http://') || (substr(Auth::user()->{$db_field}, 0, 8) == 'https://') )
-		        					<img src="{{ Auth::user()->{$db_field}  }}">
+		        				@if( (substr(Auth::guard('forum')->user()->{$db_field}, 0, 7) == 'http://') || (substr(Auth::guard('forum')->user()->{$db_field}, 0, 8) == 'https://') )
+		        					<img src="{{ Auth::guard('forum')->user()->{$db_field}  }}">
 		        				@else
-		        					<img src="{{ Config::get('chatter.user.relative_url_to_image_assets') . Auth::user()->{$db_field}  }}">
+		        					<img src="{{ Config::get('chatter.user.relative_url_to_image_assets') . Auth::guard('forum')->user()->{$db_field}  }}">
 		        				@endif
 
 		        			@else
-		        				<span class="chatter_avatar_circle" style="background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode(Auth::user()->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
-		        					{{ strtoupper(substr(Auth::user()->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
+		        				<span class="chatter_avatar_circle" style="background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
+		        					{{ strtoupper(substr(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
 		        				</span>
 		        			@endif
 		        		</div>
@@ -201,7 +201,7 @@
 									<!-- Rounded toggle switch -->
 									<span>@lang('chatter::messages.email.notify')</span>
 									<label class="switch">
-									  	<input type="checkbox" id="email_notification" name="email_notification" @if(!Auth::guest() && $discussion->users->contains(Auth::user()->id)){{ 'checked' }}@endif>
+									  	<input type="checkbox" id="email_notification" name="email_notification" @if(!Auth::guard('forum')->guest() && $discussion->users->contains(Auth::guard('forum')->user()->id)){{ 'checked' }}@endif>
 									  	<span class="on">@lang('chatter::messages.words.yes')</span>
 										<span class="off">@lang('chatter::messages.words.no')</span>
 									  	<div class="slider round"></div>
@@ -437,8 +437,8 @@
                 $('#new_discussion_in_discussion_view').slideUp();
             });
             $('#new_discussion_btn').click(function(){
-                @if(Auth::guest())
-                    window.location.href = "/{{ Config::get('chatter.routes.home') }}/login";
+                @if(Auth::guard('forum')->guest())
+                    window.location.href = "{{ route('forums.auth.login') }}";
                 @else
                     $('#new_discussion_in_discussion_view').slideDown();
                     $('#title').focus();
