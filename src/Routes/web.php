@@ -49,17 +49,17 @@ Route::group([
      * Auth routes.
      */
 
-    // Login view.
-    Route::get('login', [
-        'as'   => 'login',
-        'uses' => 'ChatterController@login',
-    ]);
+    // // Login view.
+    // Route::get('login', [
+    //     'as'   => 'login',
+    //     'uses' => 'ChatterController@login',
+    // ]);
 
-    // Register view.
-    Route::get('register', [
-        'as'   => 'register',
-        'uses' => 'ChatterController@register',
-    ]);
+    // // Register view.
+    // Route::get('register', [
+    //     'as'   => 'register',
+    //     'uses' => 'ChatterController@register',
+    // ]);
 
     /*
      * Discussion routes.
