@@ -17,7 +17,7 @@ $middleware = function ($accessor, $default = []) {
 // Authentication middleware helper.
 $authMiddleware = function ($accessor) use ($middleware) {
     return array_unique(
-        array_merge((array) $middleware($accessor), ['auth'])
+        array_merge((array) $middleware($accessor), ['auth:forum'])
     );
 };
 
