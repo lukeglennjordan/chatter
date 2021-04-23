@@ -84,7 +84,7 @@
 	                	@foreach($posts as $post)
 	                		<li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
 		                		<span class="chatter_posts">
-		                			@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user->id))
+		                			@if(Auth::guard('forum')->user() && (Auth::guard('forum')->user()->id == $post->user->id))
 		                				<div id="delete_warning_{{ $post->id }}" class="chatter_warning_delete">
 		                					<i class="chatter-warning"></i> @lang('chatter::messages.response.confirm')
 		                					<button class="btn btn-sm btn-danger pull-right delete_response">@lang('chatter::messages.response.yes_confirm')</button>
@@ -144,7 +144,7 @@
 
 	            <div id="pagination">{{ $posts->links() }}</div>
 
-	            @if(!Auth::guard('forum')->guest())
+	            @if(Auth::guard('forum')->user())
 
 	            	<div id="new_response">
 
@@ -201,7 +201,7 @@
 									<!-- Rounded toggle switch -->
 									<span>@lang('chatter::messages.email.notify')</span>
 									<label class="switch">
-									  	<input type="checkbox" id="email_notification" name="email_notification" @if(!Auth::guard('forum')->guest() && $discussion->users->contains(Auth::guard('forum')->user()->id)){{ 'checked' }}@endif>
+									  	<input type="checkbox" id="email_notification" name="email_notification" @if(Auth::guard('forum')->user() && $discussion->users->contains(Auth::guard('forum')->user()->id)){{ 'checked' }}@endif>
 									  	<span class="on">@lang('chatter::messages.words.yes')</span>
 										<span class="off">@lang('chatter::messages.words.no')</span>
 									  	<div class="slider round"></div>
@@ -437,7 +437,7 @@
                 $('#new_discussion_in_discussion_view').slideUp();
             });
             $('#new_discussion_btn').click(function(){
-                @if(Auth::guard('forum')->guest())
+                @if(!Auth::guard('forum')->user())
                     window.location.href = "{{ route('forums.auth.login') }}";
                 @else
                     $('#new_discussion_in_discussion_view').slideDown();

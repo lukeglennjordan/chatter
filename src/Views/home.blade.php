@@ -228,7 +228,7 @@
 			$('#new_discussion').slideUp();
 		});
 		$('#new_discussion_btn').click(function(){
-			@if(Auth::guard('forum')->guest())
+			@if(!Auth::guard('forum')->user())
 				window.location.href = "{{ route('forums.auth.login') }}";
 			@else
 				$('#new_discussion').slideDown();

@@ -171,7 +171,7 @@ class ChatterPostController extends Controller
         }
 
         $post = Models::post()->find($id);
-        if (!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user_id)) {
+        if (Auth::guard('forum')->user() && (Auth::guard('forum')->user()->id == $post->user_id)) {
             if ($post->markdown) {
                 $post->body = $request->body;
             } else {
