@@ -52,9 +52,9 @@ class ChatterPostController extends Controller
         $validator = Validator::make($stripped_tags_body, [
             'body' => 'required|min:10',
         ],[
-			'body.required' => trans('chatter::alert.danger.reason.content_required'),
-			'body.min' => trans('chatter::alert.danger.reason.content_min'),
-		]);
+            'body.required' => trans('chatter::alert.danger.reason.content_required'),
+            'body.min' => trans('chatter::alert.danger.reason.content_min'),
+        ]);
 
         Event::dispatch(new ChatterBeforeNewResponse($request, $validator));
         if (function_exists('chatter_before_new_response')) {
@@ -162,20 +162,20 @@ class ChatterPostController extends Controller
         $validator = Validator::make($stripped_tags_body, [
             'body' => 'required|min:10',
         ],[
-			'body.required' => trans('chatter::alert.danger.reason.content_required'),
-			'body.min' => trans('chatter::alert.danger.reason.content_min'),
-		]);
+            'body.required' => trans('chatter::alert.danger.reason.content_required'),
+            'body.min' => trans('chatter::alert.danger.reason.content_min'),
+        ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
         $post = Models::post()->find($id);
-        if (Auth::guard('forum')->user() && (Auth::guard('forum')->user()->id == $post->user_id)) {
+        if (!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user_id)) {
             if ($post->markdown) {
                 $post->body = $request->body;
             } else {
- 	        $post->body = Purifier::clean($request->body);
+            $post->body = $request->body;
             }
             $post->save();
 
