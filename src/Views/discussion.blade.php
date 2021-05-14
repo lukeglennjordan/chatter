@@ -81,10 +81,10 @@
 
 				<div class="conversation">
 	                <ul class="discussions no-bg" style="display:block;">
-	                	@foreach($posts as $post)
-	                		<li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
-		                		<span class="chatter_posts">
-		                			@if(Auth::guard('forum')->user() && (Auth::guard('forum')->user()->id == $post->user->id))
+	                	@foreach($posts as $key => $post)
+	                		<li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}" class="{{ $key === 0 ? 'shadow-sm' : 'shadow-sm'}}">
+		                		<span class="chatter_posts {{$post->best_asnwer == 1 ? 'border border-success' : '' }}">
+		                			@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user->id))
 		                				<div id="delete_warning_{{ $post->id }}" class="chatter_warning_delete">
 		                					<i class="chatter-warning"></i> @lang('chatter::messages.response.confirm')
 		                					<button class="btn btn-sm btn-danger pull-right delete_response">@lang('chatter::messages.response.yes_confirm')</button>
@@ -98,8 +98,49 @@
 			                					<i class="chatter-edit"></i> @lang('chatter::messages.words.edit')
 			                				</p>
 			                			</div>
+
+			                			@if($post->best_asnwer == 1)
+				                			<div class="chatter_post_actions" style="top: 50px">
+				                				<button type="submit" disabled class="btn btn-success btn-sm " style="padding-top: 1px !important; padding-bottom: 1px !important; margin-right: 20px;">
+				                					Best Answer
+				                				</button>
+				                			</div>
+			                			@endif
+			                		@else
+			                			@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $discussion->user_id))
+			                				@if($post->best_asnwer == 0)
+					                			<div class="chatter_post_actions">
+					                				<form method="POST" class="form-make-best-answer" action="{{route('forum.discussion.best.answer', $post->id)}}">
+					                					@csrf
+					                					<input type="hidden" name="remove" value="0">
+						                				<button type="submit" class="btn btn-primary btn-sm forum-theme-button btn-make-best-answer" style="padding-top: 1px !important; padding-bottom: 1px !important; margin-right: 10px;">
+						                					Best Answer
+						                				</button>
+					                				</form>
+					                			</div>
+					                		@else
+					                			<div class="chatter_post_actions">
+					                				<form method="POST" class="form-make-best-answer" action="{{route('forum.discussion.best.answer', $post->id)}}">
+					                					@csrf
+					                					<input type="hidden" name="remove" value="1">
+						                				<button type="submit" class="btn btn-danger btn-sm btn-make-best-answer" style="padding-top: 1px !important; padding-bottom: 1px !important; margin-right: 10px;">
+						                					Retract Best Answer
+						                				</button>
+					                				</form>
+					                			</div>
+			                				@endif
+			                			@else	
+			                				@if($post->best_asnwer == 1)
+					                			<div class="chatter_post_actions">
+					                				<span type="submit" disabled class="btn btn-success btn-sm " style="pointer-events: none; padding-top: 1px !important; padding-bottom: 1px !important; margin-right: 10px;">
+					                					Best Answer
+					                				</span>
+					                			</div>
+				                			@endif
+			                			@endif
+			                			
 			                		@endif
-			                		<div class="chatter_avatar">
+			                		<div class="chatter_avatar chatter_upvote_section">
 					        			@if(Config::get('chatter.user.avatar_image_database_field'))
 
 					        				<?php $db_field = Config::get('chatter.user.avatar_image_database_field'); ?>
@@ -112,9 +153,35 @@
 					        				@endif
 
 					        			@else
-					        				<span class="chatter_avatar_circle" style="background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode($post->user->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
-					        					{{ ucfirst(substr($post->user->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
-					        				</span>
+					        				@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id != $post->user->id))
+					        					@php 
+					        						$upvoteData = Auth::guard('forum')->user()->upvote($post->id);
+					        						$upvoteClass = '';
+					        						$downVoteClass = '';
+					        						if($upvoteData)
+					        						{
+					        							$upvoteClass = $upvoteData->type == 'up' ? 'active' : '';
+					        							$downVoteClass = $upvoteData->type == 'down' ? 'active' : '';
+					        						}
+					        					@endphp
+					        					<div class="loading-upvote-{{$post->id}} hide">
+					        						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+					        					</div>
+						        				<div class="show-upvote-{{$post->id}}">
+						        					<div id="upvote" class="{{$upvoteClass}} upvote-action upvote-action-up-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="up" data-link="{{route('forum.discussion.upvote', $post->id)}}" ></div>
+						        					<span class="badge badge-pill badge-primary badge-upvote upvotes-count-{{$post->id}}" >{{$post->upvotes}}</span>
+													<div id="downvote" class="{{$downVoteClass}} upvote-action upvote-action-down-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="down" data-link="{{route('forum.discussion.upvote', $post->id)}}" ></div>
+						        				</div>
+											@else
+												<span class="chatter_avatar_circle" style="display:none; background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode($post->user->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
+						        					{{ ucfirst(substr($post->user->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
+						        				</span>
+						        				<div class="">
+						        					<div id="upvote" class="disabled"></div>
+						        					<span class="badge badge-pill badge-primary badge-upvote upvotes-count-{{$post->id}}" >{{$post->upvotes}}</span>
+													<div id="downvote" class="disabled"></div>
+						        				</div>
+											@endif
 					        			@endif
 					        		</div>
 
@@ -144,73 +211,73 @@
 
 	            <div id="pagination">{{ $posts->links() }}</div>
 
-	            @if(Auth::guard('forum')->user())
+	            @if(!Auth::guard('forum')->guest())
+	            	@if($discussion->answered == 0)
+		            	<div id="new_response">
 
-	            	<div id="new_response">
+		            		<div class="chatter_avatar">
+			        			@if(Config::get('chatter.user.avatar_image_database_field'))
 
-	            		<div class="chatter_avatar">
-		        			@if(Config::get('chatter.user.avatar_image_database_field'))
+			        				<?php $db_field = Config::get('chatter.user.avatar_image_database_field'); ?>
 
-		        				<?php $db_field = Config::get('chatter.user.avatar_image_database_field'); ?>
+			        				<!-- If the user db field contains http:// or https:// we don't need to use the relative path to the image assets -->
+			        				@if( (substr(Auth::guard('forum')->user()->{$db_field}, 0, 7) == 'http://') || (substr(Auth::guard('forum')->user()->{$db_field}, 0, 8) == 'https://') )
+			        					<img src="{{ Auth::guard('forum')->user()->{$db_field}  }}">
+			        				@else
+			        					<img src="{{ Config::get('chatter.user.relative_url_to_image_assets') . Auth::guard('forum')->user()->{$db_field}  }}">
+			        				@endif
 
-		        				<!-- If the user db field contains http:// or https:// we don't need to use the relative path to the image assets -->
-		        				@if( (substr(Auth::guard('forum')->user()->{$db_field}, 0, 7) == 'http://') || (substr(Auth::guard('forum')->user()->{$db_field}, 0, 8) == 'https://') )
-		        					<img src="{{ Auth::guard('forum')->user()->{$db_field}  }}">
-		        				@else
-		        					<img src="{{ Config::get('chatter.user.relative_url_to_image_assets') . Auth::guard('forum')->user()->{$db_field}  }}">
-		        				@endif
+			        			@else
+			        				<span class="chatter_avatar_circle" style="background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
+			        					{{ strtoupper(substr(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
+			        				</span>
+			        			@endif
+			        		</div>
 
-		        			@else
-		        				<span class="chatter_avatar_circle" style="background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
-		        					{{ strtoupper(substr(Auth::guard('forum')->user()->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
-		        				</span>
-		        			@endif
-		        		</div>
-
-			            <div id="new_discussion">
+				            <div id="new_discussion">
 
 
-					    	<div class="chatter_loader dark" id="new_discussion_loader">
-							    <div></div>
+						    	<div class="chatter_loader dark" id="new_discussion_loader">
+								    <div></div>
+								</div>
+
+					            <form id="chatter_form_editor" action="/{{ Config::get('chatter.routes.home') }}/posts" method="POST">
+
+							        <!-- BODY -->
+							    	<div id="editor">
+										@if( $chatter_editor == 'tinymce' || empty($chatter_editor) )
+											<label id="tinymce_placeholder">@lang('chatter::messages.editor.tinymce_placeholder')</label>
+						    				<textarea id="body" class="richText" name="body" placeholder="">{{ old('body') }}</textarea>
+						    			@elseif($chatter_editor == 'simplemde')
+						    				<textarea id="simplemde" name="body" placeholder="">{{ old('body') }}</textarea>
+										@elseif($chatter_editor == 'trumbowyg')
+											<textarea class="trumbowyg" name="body" placeholder="Type Your Discussion Here...">{{ old('body') }}</textarea>
+										@endif
+									</div>
+
+							        <input type="hidden" name="_token" id="csrf_token_field" value="{{ csrf_token() }}">
+							        <input type="hidden" name="chatter_discussion_id" value="{{ $discussion->id }}">
+							    </form>
+
+							</div><!-- #new_discussion -->
+							<div id="discussion_response_email">
+								<button id="submit_response" class="btn btn-success pull-right"><i class="chatter-new"></i> @lang('chatter::messages.response.submit')</button>
+								@if(Config::get('chatter.email.enabled'))
+									<div id="notify_email">
+										<img src="{{ url('/vendor/devdojo/chatter/assets/images/email.gif') }}" class="chatter_email_loader">
+										<!-- Rounded toggle switch -->
+										<span>@lang('chatter::messages.email.notify')</span>
+										<label class="switch">
+										  	<input type="checkbox" id="email_notification" name="email_notification" @if(!Auth::guard('forum')->guest() && $discussion->users->contains(Auth::guard('forum')->user()->id)){{ 'checked' }}@endif>
+										  	<span class="on">@lang('chatter::messages.words.yes')</span>
+											<span class="off">@lang('chatter::messages.words.no')</span>
+										  	<div class="slider round"></div>
+										</label>
+									</div>
+								@endif
 							</div>
-
-				            <form id="chatter_form_editor" action="/{{ Config::get('chatter.routes.home') }}/posts" method="POST">
-
-						        <!-- BODY -->
-						    	<div id="editor">
-									@if( $chatter_editor == 'tinymce' || empty($chatter_editor) )
-										<label id="tinymce_placeholder">@lang('chatter::messages.editor.tinymce_placeholder')</label>
-					    				<textarea id="body" class="richText" name="body" placeholder="">{{ old('body') }}</textarea>
-					    			@elseif($chatter_editor == 'simplemde')
-					    				<textarea id="simplemde" name="body" placeholder="">{{ old('body') }}</textarea>
-									@elseif($chatter_editor == 'trumbowyg')
-										<textarea class="trumbowyg" name="body" placeholder="Type Your Discussion Here...">{{ old('body') }}</textarea>
-									@endif
-								</div>
-
-						        <input type="hidden" name="_token" id="csrf_token_field" value="{{ csrf_token() }}">
-						        <input type="hidden" name="chatter_discussion_id" value="{{ $discussion->id }}">
-						    </form>
-
-						</div><!-- #new_discussion -->
-						<div id="discussion_response_email">
-							<button id="submit_response" class="btn btn-success pull-right"><i class="chatter-new"></i> @lang('chatter::messages.response.submit')</button>
-							@if(Config::get('chatter.email.enabled'))
-								<div id="notify_email">
-									<img src="{{ url('/vendor/devdojo/chatter/assets/images/email.gif') }}" class="chatter_email_loader">
-									<!-- Rounded toggle switch -->
-									<span>@lang('chatter::messages.email.notify')</span>
-									<label class="switch">
-									  	<input type="checkbox" id="email_notification" name="email_notification" @if(Auth::guard('forum')->user() && $discussion->users->contains(Auth::guard('forum')->user()->id)){{ 'checked' }}@endif>
-									  	<span class="on">@lang('chatter::messages.words.yes')</span>
-										<span class="off">@lang('chatter::messages.words.no')</span>
-									  	<div class="slider round"></div>
-									</label>
-								</div>
-							@endif
 						</div>
-					</div>
-
+					@endif
 				@else
 
 					<div id="login_or_register">
@@ -437,7 +504,7 @@
                 $('#new_discussion_in_discussion_view').slideUp();
             });
             $('#new_discussion_btn').click(function(){
-                @if(!Auth::guard('forum')->user())
+                @if(Auth::guard('forum')->guest())
                     window.location.href = "{{ route('forums.auth.login') }}";
                 @else
                     $('#new_discussion_in_discussion_view').slideDown();

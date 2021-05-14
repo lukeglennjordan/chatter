@@ -25,8 +25,8 @@
 		@if( isset( $headline_logo ) && !empty( $headline_logo ) )
 			<img src="{{ Config::get('chatter.headline_logo') }}">
 		@else
-			<h1>{{Config::get('chatter.headline')}}</h1>
-			<p>{{Config::get('chatter.description')}}</p>
+			<h1>@lang('chatter::intro.headline')</h1>
+			<p>@lang('chatter::intro.description')</p>
 		@endif
 	</div>
 
@@ -71,7 +71,7 @@
 	    	</div>
 	        <div class="col-md-9 right-column">
 	        	<div class="panel">
-		        	<ul class="discussions">
+		        	<ul class="discussions shadow-sm">
 		        		@foreach($discussions as $discussion)
 				        	<li>
 				        		<a class="discussion_list" href="/{{ Config::get('chatter.routes.home') }}/{{ Config::get('chatter.routes.discussion') }}/{{ $discussion->category->slug }}/{{ $discussion->slug }}">
@@ -228,7 +228,7 @@
 			$('#new_discussion').slideUp();
 		});
 		$('#new_discussion_btn').click(function(){
-			@if(!Auth::guard('forum')->user())
+			@if(Auth::guard('forum')->guest())
 				window.location.href = "{{ route('forums.auth.login') }}";
 			@else
 				$('#new_discussion').slideDown();
