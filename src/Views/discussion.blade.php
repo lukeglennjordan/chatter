@@ -25,7 +25,8 @@
 	<div id="chatter_header" style="background-color:{{ $discussion->color }}">
 		<div class="container">
 			<a class="back_btn" href="/{{ Config::get('chatter.routes.home') }}"><i class="chatter-back"></i></a>
-			<h1>{{ $discussion->title }}</h1><span class="chatter_head_details"> @lang('chatter::messages.discussion.head_details')<a class="chatter_cat" href="/{{ Config::get('chatter.routes.home') }}/{{ Config::get('chatter.routes.category') }}/{{ $discussion->category->slug }}" style="background-color:{{ $discussion->category->color }}">{{ $discussion->category->name }}</a></span>
+			<span class="chatter_head_details"> @lang('chatter::messages.discussion.head_details')<a class="chatter_cat" href="/{{ Config::get('chatter.routes.home') }}/{{ Config::get('chatter.routes.category') }}/{{ $discussion->category->slug }}" style="background-color:{{ $discussion->category->color }}">{{ $discussion->category->name }}</a></span>
+			<h1>{{ $discussion->title }}</h1>
 		</div>
 	</div>
 
@@ -168,18 +169,19 @@
 					        						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
 					        					</div>
 						        				<div class="show-upvote-{{$post->id}}">
-						        					<div id="upvote" class="{{$upvoteClass}} upvote-action upvote-action-up-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="up" data-link="{{route('forum.discussion.upvote', $post->id)}}" ></div>
+
+						        					<div id="upvote" class="{{$upvoteClass}} upvote-action upvote-action-up-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="up" data-link="{{route('forum.discussion.upvote', $post->id)}}" ><i class="cil-thumb-up {{$upvoteClass}} upvote-action-up-{{$post->id}}" aria-hidden="true"></i></div>
 						        					<span class="badge badge-pill badge-primary badge-upvote upvotes-count-{{$post->id}}" >{{$post->upvotes}}</span>
-													<div id="downvote" class="{{$downVoteClass}} upvote-action upvote-action-down-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="down" data-link="{{route('forum.discussion.upvote', $post->id)}}" ></div>
+													<div id="downvote" class="{{$downVoteClass}} upvote-action upvote-action-down-{{$post->id}}" data-token="{{csrf_token()}}" data-id="{{$post->id}}" data-mode="down" data-link="{{route('forum.discussion.upvote', $post->id)}}" ><i class="cil-thumb-down {{$downVoteClass}} upvote-action-down-{{$post->id}}" aria-hidden="true"></i></div>
 						        				</div>
 											@else
 												<span class="chatter_avatar_circle" style="display:none; background-color:#<?= \DevDojo\Chatter\Helpers\ChatterHelper::stringToColorCode($post->user->{Config::get('chatter.user.database_field_with_user_name')}) ?>">
 						        					{{ ucfirst(substr($post->user->{Config::get('chatter.user.database_field_with_user_name')}, 0, 1)) }}
 						        				</span>
 						        				<div class="">
-						        					<div id="upvote" class="disabled"></div>
+						        					<div id="upvote" class="disabled"><i class="cil-thumb-up disabled" aria-hidden="true"></i></div>
 						        					<span class="badge badge-pill badge-primary badge-upvote upvotes-count-{{$post->id}}" >{{$post->upvotes}}</span>
-													<div id="downvote" class="disabled"></div>
+													<div id="downvote" class="disabled"><i class="cil-thumb-down disabled" aria-hidden="true"></i></div>
 						        				</div>
 											@endif
 					        			@endif
