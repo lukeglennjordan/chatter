@@ -79,10 +79,32 @@
                 </div>
                 <div class="col-md-9 right-column">
             @endif
+            	@php 
+            		$newPosts = [];
 
+            		foreach($posts as $key => $post)
+            		{
+            			if($key == 0)
+            			{
+            				$newPosts[$key] = $post;
+            			}
+            			else
+            			{
+            				if($post->best_asnwer)
+            				{
+            					$newPosts[1] = $post;
+            				}
+            				else
+            				{
+            					$newPosts[$key + 1] = $post;
+            				}
+            			}
+            		}
+            		ksort($newPosts);
+            	@endphp
 				<div class="conversation">
 	                <ul class="discussions no-bg" style="display:block;">
-	                	@foreach($posts as $key => $post)
+	                	@foreach($newPosts as $key => $post)
 	                		<li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}" class="{{ $key === 0 ? 'shadow-sm' : 'shadow-sm'}}">
 		                		<span class="chatter_posts {{$post->best_asnwer == 1 ? 'border border-success' : '' }}">
 		                			@if(!Auth::guard('forum')->guest() && (Auth::guard('forum')->user()->id == $post->user->id))
